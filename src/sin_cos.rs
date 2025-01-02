@@ -8,7 +8,7 @@ static PI: LazyLock<DBig> = LazyLock::new(|| {
         .unwrap()
 });
 
-static PIMUL2: LazyLock<DBig> = LazyLock::new(|| {
+pub static PIMUL2: LazyLock<DBig> = LazyLock::new(|| {
     DBig::from_str("3.141592653589793238462643383279502884197169399375105820974944592307816406286")
         .unwrap()
         * DBig::from(2)
@@ -20,17 +20,19 @@ static PIDIV2: LazyLock<DBig> = LazyLock::new(|| {
         / DBig::from(2)
 });
 
+static DBIGTEN: LazyLock<DBig> = LazyLock::new(|| DBig::from(10));
+
 pub fn sin(x: DBig, precision: i64) -> DBig {
     let x = (x / PIMUL2.clone()).fract() * PIMUL2.clone();
     let mut term = x.clone();
     let mut result = x.clone();
     let mut n = 1;
+    let x_sq = x.clone() * x.clone();
 
-    loop {
-        term = -term * x.clone() * x.clone() / DBig::from((2 * n) * (2 * n + 1));
-        if term.clone().abs() < DBig::from(10).powf(&DBig::from(-precision)) {
-            break;
-        }
+    let limit = DBIGTEN.powf(&DBig::from(-precision));
+
+    while term.clone().abs() > limit {
+        term = -term * x_sq.clone() / DBig::from((2 * n) * (2 * n + 1));
         result += term.clone();
         n += 1;
     }

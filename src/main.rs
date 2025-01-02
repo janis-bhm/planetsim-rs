@@ -1,5 +1,8 @@
+use crate::au::au_to_meters;
+use crate::body::{Body, BodyDynamics, OrbitingBodyDynamics, StaticBodyDynamics};
 use crate::decimal_matrix_3d::DecimalMatrix3d;
 use crate::decimal_vector_3d::DecimalVector3d;
+use crate::simulation::Simulation;
 use crate::sin_cos::{cos, f64_to_dbig, sin};
 use dashu_float::ops::Abs;
 use dashu_float::DBig;
@@ -7,8 +10,11 @@ use std::ops::Neg;
 use std::str::FromStr;
 use std::time::Instant;
 
+mod au;
+mod body;
 mod decimal_matrix_3d;
 mod decimal_vector_3d;
+mod simulation;
 mod sin_cos;
 
 fn main() {
@@ -22,4 +28,48 @@ fn main() {
     axis = matrix.apply(axis.clone());
 
     println!("Time elapsed in expensive_function() is: {:?}", duration);
+
+    let moon = Body {
+        name: String::from_str("moon").unwrap(),
+        dynamics: BodyDynamics::Orbiting(OrbitingBodyDynamics {
+            orbit_radius: DBig::from(384400000),
+            orbit_period: DBig::from(27 * 24 * 3600),
+            orbit_plane_normal: DecimalVector3d::from_f64(0.0, 1.0, 0.1).normalized(),
+        }),
+        satellites: vec![],
+        rotation_axis: DecimalVector3d::from_f64(0.3, 1.0, 0.2).normalized(),
+        rotation_period: DBig::from(27 * 24 * 3600),
+    };
+
+    let earth = Body {
+        name: String::from_str("earth").unwrap(),
+        dynamics: BodyDynamics::Orbiting(OrbitingBodyDynamics {
+            orbit_radius: au_to_meters(f64_to_dbig(1.0)),
+            orbit_period: DBig::from(365 * 24 * 3600),
+            orbit_plane_normal: DecimalVector3d::from_f64(0.1, 1.0, 0.0).normalized(),
+        }),
+        satellites: vec![moon],
+        rotation_axis: DecimalVector3d::from_f64(0.3, 1.0, 0.2).normalized(),
+        rotation_period: DBig::from(27 * 24 * 3600),
+    };
+
+    let sun = Body {
+        name: String::from_str("sun").unwrap(),
+        dynamics: BodyDynamics::Static(StaticBodyDynamics {
+            position: DecimalVector3d::from_str(
+                "64959787070023434667",
+                "23454569021239234304",
+                "29349283489",
+            ),
+        }),
+        satellites: vec![earth],
+        rotation_axis: DecimalVector3d::from_f64(0.0, 1.0, 0.0).normalized(),
+        rotation_period: DBig::from(7 * 24 * 3600),
+    };
+
+    let mut sim = Simulation::new();
+    sim.add_hierarchy(sun, None);
+    sim.update(f64_to_dbig(123123.0));
+
+    println!("{:?}", sim);
 }
