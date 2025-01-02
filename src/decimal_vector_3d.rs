@@ -3,7 +3,7 @@ use dashu_float::DBig;
 use std::fmt;
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DecimalVector3d {
     pub x: DBig,
     pub y: DBig,
@@ -91,16 +91,6 @@ impl DecimalVector3d {
 impl fmt::Display for DecimalVector3d {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{{ x: {}, y: {}, z: {} }}", self.x, self.y, self.z)
-    }
-}
-
-impl Clone for DecimalVector3d {
-    fn clone(&self) -> Self {
-        DecimalVector3d {
-            x: self.x.clone(),
-            y: self.y.clone(),
-            z: self.z.clone(),
-        }
     }
 }
 
