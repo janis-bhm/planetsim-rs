@@ -24,31 +24,25 @@ impl DecimalMatrix3d {
 
     pub fn axis_angle(axis: DecimalVector3d, angle: DBig) -> DecimalMatrix3d {
         // angle is negated to match the Three JS behavior, no idea why
-        let c = cos(-angle.clone(), 32);
-        let s = sin(-angle.clone(), 32);
-        let one_minus_c = DBig::ONE.clone() - c.clone();
+        let c = &cos(-angle.clone(), 32);
+        let s = &sin(-angle.clone(), 32);
+        let one_minus_c = &(DBig::ONE.clone() - c);
         DecimalMatrix3d {
             data: [
                 [
-                    one_minus_c.clone() * (axis.x.clone()) * (axis.x.clone()) + (c.clone()),
-                    one_minus_c.clone() * (axis.x.clone()) * (axis.y.clone())
-                        - (axis.z.clone() * (s.clone())),
-                    one_minus_c.clone() * (axis.z.clone()) * (axis.x.clone())
-                        + (axis.y.clone() * (s.clone())),
+                    one_minus_c * (&axis.x) * (&axis.x) + (c),
+                    one_minus_c * (&axis.x) * (&axis.y) - (&axis.z * (s)),
+                    one_minus_c * (&axis.z) * (&axis.x) + (&axis.y * (s)),
                 ],
                 [
-                    one_minus_c.clone() * (axis.x.clone()) * (axis.y.clone())
-                        + (axis.z.clone() * (s.clone())),
-                    one_minus_c.clone() * (axis.y.clone()) * (axis.y.clone()) + (c.clone()),
-                    one_minus_c.clone() * (axis.y.clone()) * (axis.z.clone())
-                        - (axis.x.clone() * (s.clone())),
+                    one_minus_c * (&axis.x) * (&axis.y) + (&axis.z * (s)),
+                    one_minus_c * (&axis.y) * (&axis.y) + (c),
+                    one_minus_c * (&axis.y) * (&axis.z) - (&axis.x * (s)),
                 ],
                 [
-                    one_minus_c.clone() * (axis.z.clone()) * (axis.x.clone())
-                        - (axis.y.clone() * (s.clone())),
-                    one_minus_c.clone() * (axis.y.clone()) * (axis.z.clone())
-                        + (axis.x.clone() * (s.clone())),
-                    one_minus_c.clone() * (axis.z.clone()) * (axis.z.clone()) + (c.clone()),
+                    one_minus_c * (&axis.z) * (&axis.x) - (&axis.y * (s)),
+                    one_minus_c * (&axis.y) * (&axis.z) + (&axis.x * (s)),
+                    one_minus_c * (&axis.z) * (&axis.z) + (c),
                 ],
             ],
         }
