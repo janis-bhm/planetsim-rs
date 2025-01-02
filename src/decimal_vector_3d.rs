@@ -95,457 +95,152 @@ impl fmt::Display for DecimalVector3d {
 }
 
 // ADD
+macro_rules! forward_ref_binop {
+    (impl $imp:ident, $method:ident for $t:ty, $u:ty; $v:ty) => {
+        impl $imp<$u> for &$t {
+            type Output = <$t as $imp<$u>>::Output;
 
-impl std::ops::Add<DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
+            fn $method(self, other: $u) -> <$t as $imp<$u>>::Output {
+                <$t>::new(
+                    $imp::$method(&self.x, other.x),
+                    $imp::$method(&self.y, other.y),
+                    $imp::$method(&self.z, other.z),
+                )
+            }
         }
-    }
-}
+        impl $imp<&$u> for $t {
+            type Output = <$t as $imp<$u>>::Output;
 
-impl std::ops::Add<&DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x + rhs.x.clone(),
-            y: self.y + rhs.y.clone(),
-            z: self.z + rhs.z.clone(),
+            fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
+                <$t>::new(
+                    $imp::$method(self.x, &other.x),
+                    $imp::$method(self.y, &other.y),
+                    $imp::$method(self.z, &other.z),
+                )
+            }
         }
-    }
-}
+        impl $imp<&$u> for &$t {
+            type Output = <$t as $imp<$u>>::Output;
 
-impl std::ops::Add<DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() + rhs.x,
-            y: self.y.clone() + rhs.y,
-            z: self.z.clone() + rhs.z,
+            fn $method(self, other: &$u) -> <$t as $imp<$u>>::Output {
+                <$t>::new(
+                    $imp::$method(&self.x, &other.x),
+                    $imp::$method(&self.y, &other.y),
+                    $imp::$method(&self.z, &other.z),
+                )
+            }
         }
-    }
-}
 
-impl std::ops::Add<&DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
+        // Component
+        impl $imp<$v> for &$t {
+            type Output = <$t as $imp<$v>>::Output;
 
-    fn add(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() + rhs.x.clone(),
-            y: self.y.clone() + rhs.y.clone(),
-            z: self.z.clone() + rhs.z.clone(),
+            fn $method(self, other: $v) -> <$t as $imp<$v>>::Output {
+                <$t>::new(
+                    $imp::$method(&self.x, &other),
+                    $imp::$method(&self.y, &other),
+                    $imp::$method(&self.z, &other),
+                )
+            }
         }
-    }
-}
+        impl $imp<&$v> for $t {
+            type Output = <$t as $imp<$v>>::Output;
 
-impl std::ops::Add<DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x + rhs.clone(),
-            y: self.y + rhs.clone(),
-            z: self.z + rhs.clone(),
+            fn $method(self, other: &$v) -> <$t as $imp<$v>>::Output {
+                <$t>::new(
+                    $imp::$method(self.x, other),
+                    $imp::$method(self.y, other),
+                    $imp::$method(self.z, other),
+                )
+            }
         }
-    }
-}
+        impl $imp<&$v> for &$t {
+            type Output = <$t as $imp<$v>>::Output;
 
-impl std::ops::Add<&DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x + rhs,
-            y: self.y + rhs,
-            z: self.z + rhs,
+            fn $method(self, other: &$v) -> <$t as $imp<$v>>::Output {
+                <$t>::new(
+                    $imp::$method(&self.x, other),
+                    $imp::$method(&self.y, other),
+                    $imp::$method(&self.z, other),
+                )
+            }
         }
-    }
+    };
 }
 
-impl std::ops::Add<DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
+macro_rules! impl_binop {
+    (impl $imp:ident, $method:ident for $t:ty, $v:ty) => {
+        impl $imp<$t> for $t {
+            type Output = $t;
 
-    fn add(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() + rhs.clone(),
-            y: self.y.clone() + rhs.clone(),
-            z: self.z.clone() + rhs.clone(),
+            fn $method(self, other: $t) -> Self::Output {
+                Self::new(
+                    $imp::$method(self.x, other.x),
+                    $imp::$method(self.y, other.y),
+                    $imp::$method(self.z, other.z),
+                )
+            }
         }
-    }
-}
+        impl $imp<$v> for $t {
+            type Output = $t;
 
-impl std::ops::Add<&DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn add(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() + rhs.clone(),
-            y: self.y.clone() + rhs.clone(),
-            z: self.z.clone() + rhs.clone(),
+            fn $method(self, other: $v) -> Self::Output {
+                Self::new(
+                    $imp::$method(self.x, &other),
+                    $imp::$method(self.y, &other),
+                    $imp::$method(self.z, &other),
+                )
+            }
         }
-    }
+
+        forward_ref_binop!(impl $imp, $method for $t, $t; $v);
+    };
 }
 
-impl std::ops::AddAssign<&DBig> for DecimalVector3d {
-    fn add_assign(&mut self, rhs: &DBig) {
-        self.x += rhs.clone();
-        self.y += rhs.clone();
-        self.z += rhs.clone();
-    }
-}
-
-impl std::ops::AddAssign<DBig> for DecimalVector3d {
-    fn add_assign(&mut self, rhs: DBig) {
-        self.x += rhs.clone();
-        self.y += rhs.clone();
-        self.z += rhs.clone();
-    }
-}
-
-// SUB
-
-impl std::ops::Sub<DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+macro_rules! impl_binop_assign {
+    (impl $imp:ident, $method:ident for $t:ty, $v:ty) => {
+        // *Assign<Component>
+        impl $imp<$v> for $t {
+            fn $method(&mut self, other: $v) {
+                $imp::$method(&mut self.x, &other);
+                $imp::$method(&mut self.y, &other);
+                $imp::$method(&mut self.z, &other);
+            }
         }
-    }
-}
-
-impl std::ops::Sub<&DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x - rhs.x.clone(),
-            y: self.y - rhs.y.clone(),
-            z: self.z - rhs.z.clone(),
+        impl $imp<&$v> for $t {
+            fn $method(&mut self, other: &$v) {
+                $imp::$method(&mut self.x, other);
+                $imp::$method(&mut self.y, other);
+                $imp::$method(&mut self.z, other);
+            }
         }
-    }
-}
-
-impl std::ops::Sub<DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() - rhs.x,
-            y: self.y.clone() - rhs.y,
-            z: self.z.clone() - rhs.z,
+        // *Assign<Self>
+        impl $imp<$t> for $t {
+            fn $method(&mut self, other: $t) {
+                $imp::$method(&mut self.x, &other.x);
+                $imp::$method(&mut self.y, &other.y);
+                $imp::$method(&mut self.z, &other.z);
+            }
         }
-    }
-}
-
-impl std::ops::Sub<&DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() - rhs.x.clone(),
-            y: self.y.clone() - rhs.y.clone(),
-            z: self.z.clone() - rhs.z.clone(),
+        impl $imp<&$t> for $t {
+            fn $method(&mut self, other: &$t) {
+                $imp::$method(&mut self.x, &other.x);
+                $imp::$method(&mut self.y, &other.y);
+                $imp::$method(&mut self.z, &other.z);
+            }
         }
-    }
+    };
 }
 
-impl std::ops::Sub<DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+impl_binop!(impl Add, add for DecimalVector3d, DBig);
+impl_binop_assign!(impl AddAssign, add_assign for DecimalVector3d, DBig);
 
-    fn sub(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x - rhs.clone(),
-            y: self.y - rhs.clone(),
-            z: self.z - rhs.clone(),
-        }
-    }
-}
+impl_binop!(impl Sub, sub for DecimalVector3d, DBig);
+impl_binop_assign!(impl SubAssign, sub_assign for DecimalVector3d, DBig);
 
-impl std::ops::Sub<&DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
+impl_binop!(impl Mul, mul for DecimalVector3d, DBig);
+impl_binop_assign!(impl MulAssign, mul_assign for DecimalVector3d, DBig);
 
-    fn sub(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x - rhs,
-            y: self.y - rhs,
-            z: self.z - rhs,
-        }
-    }
-}
-
-impl std::ops::Sub<DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() - rhs.clone(),
-            y: self.y.clone() - rhs.clone(),
-            z: self.z.clone() - rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::Sub<&DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn sub(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() - rhs.clone(),
-            y: self.y.clone() - rhs.clone(),
-            z: self.z.clone() - rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::SubAssign<&DBig> for DecimalVector3d {
-    fn sub_assign(&mut self, rhs: &DBig) {
-        self.x -= rhs.clone();
-        self.y -= rhs.clone();
-        self.z -= rhs.clone();
-    }
-}
-
-impl std::ops::SubAssign<DBig> for DecimalVector3d {
-    fn sub_assign(&mut self, rhs: DBig) {
-        self.x -= rhs.clone();
-        self.y -= rhs.clone();
-        self.z -= rhs.clone();
-    }
-}
-
-// MUL
-
-impl std::ops::Mul<DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x * rhs.x,
-            y: self.y * rhs.y,
-            z: self.z * rhs.z,
-        }
-    }
-}
-
-impl std::ops::Mul<&DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x * rhs.x.clone(),
-            y: self.y * rhs.y.clone(),
-            z: self.z * rhs.z.clone(),
-        }
-    }
-}
-
-impl std::ops::Mul<DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() * rhs.x,
-            y: self.y.clone() * rhs.y,
-            z: self.z.clone() * rhs.z,
-        }
-    }
-}
-
-impl std::ops::Mul<&DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() * rhs.x.clone(),
-            y: self.y.clone() * rhs.y.clone(),
-            z: self.z.clone() * rhs.z.clone(),
-        }
-    }
-}
-
-impl std::ops::Mul<DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x * rhs.clone(),
-            y: self.y * rhs.clone(),
-            z: self.z * rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::Mul<&DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-        }
-    }
-}
-
-impl std::ops::Mul<DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() * rhs.clone(),
-            y: self.y.clone() * rhs.clone(),
-            z: self.z.clone() * rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::Mul<&DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn mul(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() * rhs.clone(),
-            y: self.y.clone() * rhs.clone(),
-            z: self.z.clone() * rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::MulAssign<&DBig> for DecimalVector3d {
-    fn mul_assign(&mut self, rhs: &DBig) {
-        self.x *= rhs.clone();
-        self.y *= rhs.clone();
-        self.z *= rhs.clone();
-    }
-}
-
-impl std::ops::MulAssign<DBig> for DecimalVector3d {
-    fn mul_assign(&mut self, rhs: DBig) {
-        self.x *= rhs.clone();
-        self.y *= rhs.clone();
-        self.z *= rhs.clone();
-    }
-}
-
-// DIV
-
-impl std::ops::Div<DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x / rhs.x,
-            y: self.y / rhs.y,
-            z: self.z / rhs.z,
-        }
-    }
-}
-
-impl std::ops::Div<&DecimalVector3d> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x / rhs.x.clone(),
-            y: self.y / rhs.y.clone(),
-            z: self.z / rhs.z.clone(),
-        }
-    }
-}
-
-impl std::ops::Div<DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() / rhs.x,
-            y: self.y.clone() / rhs.y,
-            z: self.z.clone() / rhs.z,
-        }
-    }
-}
-
-impl std::ops::Div<&DecimalVector3d> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: &DecimalVector3d) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() / rhs.x.clone(),
-            y: self.y.clone() / rhs.y.clone(),
-            z: self.z.clone() / rhs.z.clone(),
-        }
-    }
-}
-
-impl std::ops::Div<DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x / rhs.clone(),
-            y: self.y / rhs.clone(),
-            z: self.z / rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::Div<&DBig> for DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x / rhs,
-            y: self.y / rhs,
-            z: self.z / rhs,
-        }
-    }
-}
-
-impl std::ops::Div<DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() / rhs.clone(),
-            y: self.y.clone() / rhs.clone(),
-            z: self.z.clone() / rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::Div<&DBig> for &DecimalVector3d {
-    type Output = DecimalVector3d;
-
-    fn div(self, rhs: &DBig) -> DecimalVector3d {
-        DecimalVector3d {
-            x: self.x.clone() / rhs.clone(),
-            y: self.y.clone() / rhs.clone(),
-            z: self.z.clone() / rhs.clone(),
-        }
-    }
-}
-
-impl std::ops::DivAssign<&DBig> for DecimalVector3d {
-    fn div_assign(&mut self, rhs: &DBig) {
-        self.x /= rhs.clone();
-        self.y /= rhs.clone();
-        self.z /= rhs.clone();
-    }
-}
-
-impl std::ops::DivAssign<DBig> for DecimalVector3d {
-    fn div_assign(&mut self, rhs: DBig) {
-        self.x /= rhs.clone();
-        self.y /= rhs.clone();
-        self.z /= rhs.clone();
-    }
-}
+impl_binop!(impl Div, div for DecimalVector3d, DBig);
+impl_binop_assign!(impl DivAssign, div_assign for DecimalVector3d, DBig);
