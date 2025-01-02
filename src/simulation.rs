@@ -51,23 +51,11 @@ impl Simulation {
     }
 
     fn get_body_by_id(&self, id: i32) -> Option<&SimulatedBody> {
-        for i in 0..self.bodies.len() {
-            if self.bodies[i].id == id {
-                return Some(&self.bodies[i]);
-            }
-        }
-
-        None
+        self.bodies.iter().find(|body| body.id == id)
     }
 
     fn get_mut_body_by_id(&mut self, id: i32) -> Option<&mut SimulatedBody> {
-        for i in 0..self.bodies.len() {
-            if self.bodies[i].id == id {
-                return Some(&mut self.bodies[i]);
-            }
-        }
-
-        None
+        self.bodies.iter_mut().find(|body| body.id == id)
     }
 
     fn resolve_hierarchy_up(&self, body: &SimulatedBody) -> Vec<&SimulatedBody> {
